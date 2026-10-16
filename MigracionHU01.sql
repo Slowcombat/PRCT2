@@ -12,7 +12,7 @@ USE examen2_soto;
 
 -- 1. Catálogo de estados
 CREATE TABLE IF NOT EXISTS estado_tarjeta (
-    codigo       VARCHAR(10)  NOT NULL  COMMENT 'Nombre de la constante del enum EstadoTarjeta',
+    codigo       VARCHAR(10)  NOT NULL  COMMENT 'Nombre de la constante del enum Tarjeta.Estado',
     descripcion  VARCHAR(100) NOT NULL  COMMENT 'Significado del estado',
     PRIMARY KEY (codigo)
 ) ENGINE = InnoDB

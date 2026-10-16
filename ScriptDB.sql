@@ -13,7 +13,7 @@
 --  │  Clase Java            │  Tabla MySQL       │  Relación   │
 --  ├────────────────────────────────────────────────────────────┤
 --  │  Titular               │  titular           │  —          │
---  │  EstadoTarjeta (enum)  │  estado_tarjeta    │  catálogo   │
+--  │  Tarjeta.Estado (enum) │  estado_tarjeta    │  catálogo   │
 --  │  Tarjeta  (abstracta)  │  tarjeta           │  —          │
 --  │  Debito  extends Tarjeta│ tarjeta_debito    │  1:1 FK     │
 --  │  Credito extends Tarjeta│ tarjeta_credito   │  1:1 FK     │
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS titular (
 
 -- ================================================================
 -- TABLA 1.1 — estado_tarjeta  (HU-01)
--- Enum Java: EstadoTarjeta { ACTIVA, BLOQUEADA, CANCELADA }
+-- Enum Java anidado: Tarjeta.Estado { ACTIVA, BLOQUEADA, CANCELADA }
 -- Catálogo de estados válidos. Se usa una tabla + FK (y no un ENUM)
 -- porque MySQL asigna a un ENUM NOT NULL su primer valor cuando el
 -- INSERT omite la columna; con la FK, una tarjeta sin estado o con
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS titular (
 -- ================================================================
 CREATE TABLE IF NOT EXISTS estado_tarjeta (
 
-    codigo       VARCHAR(10)  NOT NULL  COMMENT 'Nombre de la constante del enum EstadoTarjeta',
+    codigo       VARCHAR(10)  NOT NULL  COMMENT 'Nombre de la constante del enum Tarjeta.Estado',
     descripcion  VARCHAR(100) NOT NULL  COMMENT 'Significado del estado',
 
     PRIMARY KEY (codigo)

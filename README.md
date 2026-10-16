@@ -19,11 +19,13 @@ Aplicación de escritorio en **JavaFX** con persistencia en **MySQL** para regis
 
 | # | Criterio | Cómo se cumple | Prueba que lo verifica |
 |---|---|---|---|
-| CA1 | La tarjeta puede estar **Activa**, **Bloqueada** o **Cancelada**. | Enum `EstadoTarjeta` y tabla catálogo `estado_tarjeta`. | `TestEstadoTarjeta.existenExactamenteLosTresEstadosDeLaHU` |
+| CA1 | La tarjeta puede estar **Activa**, **Bloqueada** o **Cancelada**. | Enum `Tarjeta.Estado` (anidado en `Tarjeta`) y tabla catálogo `estado_tarjeta`. | `TestEstado.existenExactamenteLosTresEstadosDeLaHU` |
 | CA2 | El estado se almacena de forma **persistente** en la base de datos. | Columna `tarjeta.estado` (FK a `estado_tarjeta`); `DAOTarjeta.create`, `readone` y `actualizarEstado` la escriben y leen. | `TestDAOTarjeta.create_debito_persisteEstado`, `create_credito_persisteEstado`, `actualizarEstado_persisteElNuevoEstado` |
 | CA3 | El estado se **visualiza** en el formulario principal. | Pestaña *Consultar*: etiqueta "Estado: …" con color por estado y en el detalle de la tarjeta. | `TestTarjeta.toString_contieneDatosYEstado` |
 | CA4 | El estado es **obligatorio** al crear una tarjeta. | Pestaña *Crear*: `ComboBox` "Estado *" sin valor preseleccionado; el controlador no deja continuar sin él. | `TestTarjeta.constructor_sinEstado_lanzaExcepcion` |
-| CA5 | **No** es posible guardar una tarjeta sin un estado válido. | Tres capas: el modelo rechaza `null`, el DAO valida antes del SQL y la BD rechaza estados vacíos o inexistentes (`NOT NULL` + FK). | `TestTarjeta.setEstado_null_…`, `TestEstadoTarjeta.desdeTexto_rechaza…`, `TestDAOTarjeta.baseDeDatos_rechazaTarjetaSinEstado`, `baseDeDatos_rechazaEstadoInvalido` |
+| CA5 | **No** es posible guardar una tarjeta sin un estado válido. | Tres capas: el modelo rechaza `null`, el DAO valida antes del SQL y la BD rechaza estados vacíos o inexistentes (`NOT NULL` + FK). | `TestTarjeta.setEstado_null_…`, `TestEstado.desdeTexto_rechaza…`, `TestDAOTarjeta.baseDeDatos_rechazaTarjetaSinEstado`, `baseDeDatos_rechazaEstadoInvalido` |
+
+**¿Por qué el enum está dentro de `Tarjeta`?** El estado solo tiene sentido como parte de una tarjeta, así que se declara como `Tarjeta.Estado`. Al ser un tipo `public static` anidado, el DAO, el controlador y las pruebas lo usan con `import co.edu.poli.parcial2.modelo.Tarjeta.Estado;`.
 
 **Regla de negocio adicional:** una tarjeta **Cancelada** es una baja definitiva; no puede volver a activarse ni bloquearse (`Tarjeta.activar()` / `bloquear()` lanzan `IllegalStateException`).
 
@@ -34,7 +36,7 @@ Estimada con *Planning Poker* (escala Fibonacci) en **5 puntos de historia**: to
 | Actividad | Horas |
 |---|---:|
 | Análisis y diseño (UML, modelo de datos) | 1.5 |
-| Modelo: enum `EstadoTarjeta` y cambios en `Tarjeta`/`Debito`/`Credito` | 1.5 |
+| Modelo: enum `Tarjeta.Estado` y cambios en `Tarjeta`/`Debito`/`Credito` | 1.5 |
 | Base de datos: script y migración | 1.0 |
 | DAO: persistencia del estado y actualización | 1.5 |
 | Vista y controlador (FXML) | 1.5 |
@@ -44,15 +46,15 @@ Estimada con *Planning Poker* (escala Fibonacci) en **5 puntos de historia**: to
 
 ### Tareas técnicas
 
-- [x] **T1** · Crear el enum `EstadoTarjeta` (`ACTIVA`, `BLOQUEADA`, `CANCELADA`) con etiqueta legible, `permiteUso()` y `desdeTexto()`.
-- [x] **T2** · Cambiar el atributo `estado` de `Tarjeta` de `boolean` a `EstadoTarjeta`, validar que no sea `null` y agregar `cancelar()` y `puedeUsarse()`.
+- [x] **T1** · Crear el enum `Estado` dentro de la clase `Tarjeta` (`ACTIVA`, `BLOQUEADA`, `CANCELADA`) con etiqueta legible, `permiteUso()` y `desdeTexto()`.
+- [x] **T2** · Cambiar el atributo `estado` de `Tarjeta` de `boolean` a `Tarjeta.Estado`, validar que no sea `null` y agregar `cancelar()` y `puedeUsarse()`.
 - [x] **T3** · Actualizar los constructores de `Debito` y `Credito`.
 - [x] **T4** · Base de datos: crear la tabla catálogo `estado_tarjeta`, cambiar `tarjeta.estado` a `VARCHAR(10) NOT NULL` con FK y actualizar los datos de prueba (`ScriptDB.sql`).
 - [x] **T5** · Escribir `MigracionHU01.sql` para bases existentes (convierte `1 → ACTIVA`, `0 → BLOQUEADA`).
 - [x] **T6** · `DAOTarjeta`: guardar y leer el estado como texto, `validarParaGuardar()` y `actualizarEstado()`.
 - [x] **T7** · `formCard.fxml`: `ComboBox` de estado obligatorio en *Crear*; etiqueta de estado y cambio de estado en *Consultar*.
 - [x] **T8** · `ControlFormCard`: validar el estado obligatorio, mostrar el estado con color y aplicar el cambio de estado.
-- [x] **T9** · Pruebas unitarias (`TestEstadoTarjeta`, `TestTarjeta`, `TestDAOTarjetaValidacion`) y de integración (`TestDAOTarjeta`).
+- [x] **T9** · Pruebas unitarias (`TestEstado`, `TestTarjeta`, `TestDAOTarjetaValidacion`) y de integración (`TestDAOTarjeta`).
 - [x] **T10** · Documentar con JavaDoc y actualizar el diagrama UML de clases.
 
 ---
@@ -84,18 +86,18 @@ JavaFxMySQL/
 ├── ScriptDB.sql            ← script completo de la base (v2.0, HU-01)
 ├── MigracionHU01.sql       ← migración para bases creadas con la versión anterior
 ├── docs/                   ← diagrama UML y capturas
-└── examen2_Soto/
+└── parcial2/
     ├── .env.example
     ├── pom.xml
     └── src/
-        ├── main/java/co/edu/poli/examen2_Soto/
-        │   ├── modelo/        Tarjeta, Debito, Credito, Titular, EstadoTarjeta
+        ├── main/java/co/edu/poli/parcial2/
+        │   ├── modelo/        Tarjeta (con el enum Estado), Debito, Credito, Titular
         │   ├── servicios/     CRUD, ConexionBD, DAOTarjeta, DAOTitular
         │   ├── controlador/   ControlFormCard
         │   └── vista/         App
         ├── main/resources/…/formCard.fxml
         └── test/java/…/tests/
-            ├── unitaria/      TestEstadoTarjeta, TestTarjeta, TestDAOTarjetaValidacion
+            ├── unitaria/      TestEstado, TestTarjeta, TestDAOTarjetaValidacion
             └── integracion/   TestDAOTarjeta, TestDAOTitular
 ```
 
@@ -113,9 +115,9 @@ Si ya tenía la base de la versión anterior, ejecute solo la migración:
 mysql -u root -p < MigracionHU01.sql
 ```
 
-**2. Credenciales.** Copie `examen2_Soto/.env.example` como `examen2_Soto/.env` y ponga su usuario y contraseña de MySQL.
+**2. Credenciales.** Copie `parcial2/.env.example` como `parcial2/.env` y ponga su usuario y contraseña de MySQL.
 
-**3. Ejecutar la aplicación** (desde `examen2_Soto/`):
+**3. Ejecutar la aplicación** (desde `parcial2/`):
 
 ```bash
 mvn clean javafx:run
@@ -137,7 +139,7 @@ mvn test -Pintegracion
 
 | Clase | Tipo | Pruebas |
 |---|---|---:|
-| `TestEstadoTarjeta` | Unitaria | 11 |
+| `TestEstado` | Unitaria | 11 |
 | `TestTarjeta` | Unitaria | 10 |
 | `TestDAOTarjetaValidacion` | Unitaria | 4 |
 | `TestDAOTarjeta` | Integración | 7 |
@@ -152,15 +154,16 @@ Las pruebas de integración borran sus propios registros (`999xxx`) antes y desp
 mvn javadoc:javadoc
 ```
 
-Se genera en `examen2_Soto/target/site/apidocs/index.html`.
+Se genera en `parcial2/target/site/apidocs/index.html`.
 
 ## Otros cambios realizados
 
 - `fecha_exp` pasó de `VARCHAR(7)` a `VARCHAR(10)`: la aplicación guarda `dd/MM/yyyy` (10 caracteres) y MySQL en modo estricto rechazaba el INSERT.
-- `mainClass` del `javafx-maven-plugin` apuntaba a `co.edu.poli.examen2_Soto.App`, que no existe; ahora apunta a `vista.App`.
+- `mainClass` del `javafx-maven-plugin` apuntaba a `co.edu.poli.parcial2.App`, que no existe; ahora apunta a `vista.App`.
 - Al limpiar el formulario de creación, la fecha quedaba en `null` y la siguiente creación fallaba con `NullPointerException`; ahora se reinicia a la fecha actual.
 - `DAOTarjeta.create` envuelve ambos INSERT en la misma transacción (antes el primero quedaba fuera del `try`).
-- El `.gitignore` raíz excluía la carpeta `examen2_Soto/`; ahora solo excluye `target/` y `.env`.
+- El `.gitignore` raíz excluía la carpeta del proyecto; ahora solo excluye `target/` y `.env`.
+- El paquete base pasó de `co.edu.poli.examen2_Soto` a `co.edu.poli.parcial2` (también el módulo, la carpeta y el `artifactId`).
 
 ## Uso de IA
 
