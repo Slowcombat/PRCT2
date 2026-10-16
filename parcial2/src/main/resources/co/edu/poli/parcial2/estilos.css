@@ -232,10 +232,6 @@
     -fx-font-family: "Ubuntu Mono", "DejaVu Sans Mono", monospace;
     -fx-font-size: 13px;
 }
-.celda-dinero {
-    -fx-alignment: CENTER_RIGHT;
-    -fx-padding: 0 14 0 6;
-}
 .table-view .placeholder .label {
     -fx-text-fill: -c-suave;
 }

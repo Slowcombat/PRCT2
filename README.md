@@ -4,7 +4,7 @@ Aplicación de escritorio en **JavaFX** con persistencia en **MySQL** para regis
 
 **Funcionalidades:**
 
-- Listado de **todas las tarjetas** con su estado en color, búsqueda por número o titular y filtro por estado.
+- Listado de **todas las tarjetas** con su tipo, titular y estado en color, búsqueda por número o titular y filtro por estado.
 - Panel de **detalle** de la tarjeta seleccionada, desde donde se le **asigna un nuevo estado**.
 - Registro de **tarjetas** con estado y titular obligatorios.
 - Registro de **titulares**, desde su propia pestaña o con el botón *+ Nuevo* del formulario de tarjeta.
@@ -171,9 +171,9 @@ Se genera en `parcial2/target/site/apidocs/index.html`.
 
 ## Mejoras adicionales a la HU-01
 
-- **Listado de tarjetas:** `DAOTarjeta.readall()` trae todas las tarjetas con su titular, tipo, estado y saldo o límite en una sola consulta (`LEFT JOIN` a las tablas de débito y crédito). Ya no hace falta buscar por número.
+- **Listado de tarjetas:** `DAOTarjeta.readall()` trae todas las tarjetas con su titular, tipo y estado en una sola consulta (`LEFT JOIN` a las tablas de débito y crédito). Ya no hace falta buscar por número.
 - **Titulares:** `DAOTitular.create()` y `readone()` permiten registrar titulares; se valida identificación y nombre, y se informa si la identificación ya existe.
-- **Formulario de tarjeta:** se puede indicar el saldo inicial (débito) o el límite (crédito); antes eran valores fijos.
+- **Saldo y límite:** no los pide la HU-01, así que no se muestran ni se piden en la interfaz. Las clases `Debito` y `Credito` y sus tablas los conservan tal como venían en el proyecto base (débito con saldo 0 y crédito con límite fijo de $1.000.000).
 - **Diseño:** hoja de estilos `estilos.css`, ventana redimensionable, insignias de color por estado y mensajes en la barra inferior.
 
 ## Otros cambios realizados

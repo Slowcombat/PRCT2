@@ -42,14 +42,6 @@ public class Debito extends Tarjeta {
 	}
 
 	/**
-	 * @return saldo disponible
-	 */
-	@Override
-	public double getDisponible() {
-		return saldo;
-	}
-
-	/**
 	 * @return "Débito"
 	 */
 	@Override

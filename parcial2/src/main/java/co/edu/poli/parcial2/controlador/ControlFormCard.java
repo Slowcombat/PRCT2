@@ -1,13 +1,10 @@
 package co.edu.poli.parcial2.controlador;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 
@@ -75,9 +72,6 @@ public class ControlFormCard {
 	/** Texto de la opción del filtro que muestra todos los estados. */
 	private static final String TODOS_LOS_ESTADOS = "Todos los estados";
 
-	/** Formato de moneda colombiana sin decimales, p. ej. {@code $ 1.500.000}. */
-	private static final DecimalFormat FORMATO_DINERO = new DecimalFormat("$ #,##0",
-			DecimalFormatSymbols.getInstance(Locale.forLanguageTag("es-CO")));
 
 	// ---------- Encabezado y mensajes ----------
 	@FXML
@@ -117,8 +111,6 @@ public class ControlFormCard {
 	@FXML
 	private TableColumn<Tarjeta, Estado> colEstado;
 	@FXML
-	private TableColumn<Tarjeta, Number> colDisponible;
-	@FXML
 	private Label lblSinSeleccion;
 	@FXML
 	private VBox panelDetalle;
@@ -134,10 +126,6 @@ public class ControlFormCard {
 	private Label lblFechaVisual;
 	@FXML
 	private Label lblEstadoDetalle;
-	@FXML
-	private Label lblDisponibleTitulo;
-	@FXML
-	private Label lblDisponibleDetalle;
 	/** Estado que se asignará a la tarjeta seleccionada (HU-01). */
 	@FXML
 	private ComboBox<Estado> cmbNuevoEstado;
@@ -153,10 +141,6 @@ public class ControlFormCard {
 	private RadioButton radio2; // Crédito
 	@FXML
 	private ToggleGroup tipo;
-	@FXML
-	private Label lblMontoInicial;
-	@FXML
-	private TextField txtMontoInicial;
 	@FXML
 	private ComboBox<Titular> cmbTitular;
 	/** Estado obligatorio de la tarjeta a crear (HU-01). */
@@ -249,15 +233,6 @@ public class ControlFormCard {
 			}
 		});
 
-		colDisponible.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().getDisponible()));
-		colDisponible.getStyleClass().add("celda-dinero");
-		colDisponible.setCellFactory(col -> new TableCell<Tarjeta, Number>() {
-			@Override
-			protected void updateItem(Number valor, boolean vacio) {
-				super.updateItem(valor, vacio);
-				setText(vacio || valor == null ? null : FORMATO_DINERO.format(valor.doubleValue()));
-			}
-		});
 
 		tarjetasFiltradas = new FilteredList<>(tarjetas, t -> true);
 		SortedList<Tarjeta> ordenadas = new SortedList<>(tarjetasFiltradas);
@@ -312,12 +287,8 @@ public class ControlFormCard {
 		datepk1.setValue(LocalDate.now());
 
 		txtNumero.setTextFormatter(new TextFormatter<>(soloDigitos(20)));
-		txtMontoInicial.setTextFormatter(new TextFormatter<>(soloDecimales()));
 		txtIdTitular.setTextFormatter(new TextFormatter<>(soloAlfanumerico(50)));
 
-		// El valor inicial es saldo (débito) o límite (crédito)
-		tipo.selectedToggleProperty().addListener((obs, a, b) -> lblMontoInicial
-				.setText(radio2.isSelected() ? "Límite de crédito *" : "Saldo inicial *"));
 
 		// HU-01: no se preselecciona estado para obligar a elegirlo
 		cmbEstado.getItems().setAll(Estado.values());
@@ -438,8 +409,6 @@ public class ControlFormCard {
 		lblFechaVisual.setText(t.getFechaExp());
 
 		pintarInsignia(lblEstadoDetalle, t.getEstado());
-		lblDisponibleTitulo.setText(t instanceof Debito ? "Saldo" : "Límite de crédito");
-		lblDisponibleDetalle.setText(FORMATO_DINERO.format(t.getDisponible()));
 	}
 
 	/**
@@ -504,7 +473,7 @@ public class ControlFormCard {
 
 	/**
 	 * Crea una tarjeta débito o crédito con los datos del formulario.
-	 * Valida número, fecha, valor inicial, titular y estado (HU-01).
+	 * Valida número, fecha, titular y estado (HU-01).
 	 *
 	 * @param event evento del botón "Guardar tarjeta"
 	 */
@@ -521,10 +490,6 @@ public class ControlFormCard {
 			marcarError(datepk1, "Seleccione la fecha de expedición.");
 			return;
 		}
-		Double monto = leerMonto(txtMontoInicial);
-		if (monto == null) {
-			monto = 0.0;
-		}
 		Titular titular = cmbTitular.getValue();
 		if (titular == null) {
 			marcarError(cmbTitular, "Seleccione un titular o cree uno con \"+ Nuevo\".");
@@ -537,8 +502,10 @@ public class ControlFormCard {
 		}
 
 		String fechaExp = datepk1.getValue().format(FORMATO_FECHA);
-		Tarjeta nueva = radio1.isSelected() ? new Debito(numero, fechaExp, estado, titular, monto)
-				: new Credito(numero, fechaExp, estado, titular, monto);
+		// Saldo y límite no hacen parte de la HU-01: se usan los valores por
+		// defecto del proyecto base (débito sin saldo, crédito con límite fijo).
+		Tarjeta nueva = radio1.isSelected() ? new Debito(numero, fechaExp, estado, titular, 0.0)
+				: new Credito(numero, fechaExp, estado, titular, 1000000);
 
 		try {
 			String resultado = daoTarjeta.create(nueva);
@@ -698,24 +665,6 @@ public class ControlFormCard {
 	}
 
 	/**
-	 * Lee un valor monetario de un campo de texto.
-	 *
-	 * @param campo campo con el valor
-	 * @return el valor, o {@code null} si está vacío o no es válido
-	 */
-	private Double leerMonto(TextField campo) {
-		String texto = campo.getText() == null ? "" : campo.getText().trim().replace(",", ".");
-		if (texto.isEmpty()) {
-			return null;
-		}
-		try {
-			return Double.parseDouble(texto);
-		} catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	/**
 	 * Filtro de entrada que solo acepta dígitos, con una longitud máxima.
 	 *
 	 * @param max cantidad máxima de caracteres
@@ -733,15 +682,6 @@ public class ControlFormCard {
 	 */
 	private UnaryOperator<TextFormatter.Change> soloAlfanumerico(int max) {
 		return c -> c.getControlNewText().matches("[A-Za-z0-9-]{0," + max + "}") ? c : null;
-	}
-
-	/**
-	 * Filtro de entrada que acepta números con hasta dos decimales.
-	 *
-	 * @return filtro para un {@link TextFormatter}
-	 */
-	private UnaryOperator<TextFormatter.Change> soloDecimales() {
-		return c -> c.getControlNewText().matches("\\d{0,12}([.,]\\d{0,2})?") ? c : null;
 	}
 
 	/**
@@ -772,7 +712,6 @@ public class ControlFormCard {
 	private void limpiarFormCrear() {
 		limpiarErrores();
 		txtNumero.clear();
-		txtMontoInicial.clear();
 		datepk1.setValue(LocalDate.now());
 		cmbTitular.setValue(null);
 		cmbEstado.setValue(null);

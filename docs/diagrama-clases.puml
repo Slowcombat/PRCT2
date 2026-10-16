@@ -31,7 +31,6 @@ package "co.edu.poli.parcial2.modelo" {
     + bloquear() : String
     + activar() : String
     + cancelar() : String
-    + {abstract} getDisponible() : double
     + {abstract} getTipo() : String
     - validarNoCancelada() : void
   }
@@ -54,13 +53,11 @@ package "co.edu.poli.parcial2.modelo" {
 
   class Debito {
     - saldo : double
-    + getDisponible() : double
     + getTipo() : String
   }
 
   class Credito {
     - limite : double
-    + getDisponible() : double
     + getTipo() : String
   }
 

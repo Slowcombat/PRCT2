@@ -183,7 +183,7 @@ public abstract class Tarjeta {
 	 * @param estado nuevo estado (obligatorio)
 	 * @throws IllegalArgumentException si {@code estado} es {@code null}
 	 */
-	public void setEstado(Estado estado) {
+	public final void setEstado(Estado estado) {
 		if (estado == null) {
 			throw new IllegalArgumentException("El estado de la tarjeta es obligatorio.");
 		}
@@ -246,14 +246,6 @@ public abstract class Tarjeta {
 		this.estado = Estado.CANCELADA;
 		return "Tarjeta " + numero + " CANCELADA.";
 	}
-
-	/**
-	 * Valor monetario de la tarjeta que se muestra en la tabla: saldo en
-	 * débito, límite en crédito.
-	 *
-	 * @return saldo o límite
-	 */
-	public abstract double getDisponible();
 
 	/**
 	 * Nombre del tipo de tarjeta para mostrar en la interfaz.

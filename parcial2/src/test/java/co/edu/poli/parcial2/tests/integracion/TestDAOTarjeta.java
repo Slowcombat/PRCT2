@@ -132,7 +132,7 @@ public class TestDAOTarjeta {
 		assertTrue(c instanceof Credito);
 		assertEquals(Estado.BLOQUEADA, d.getEstado());
 		assertEquals(Estado.ACTIVA, c.getEstado());
-		assertEquals(700.0, d.getDisponible());
+		assertEquals(700.0, ((Debito) d).getSaldo());
 		assertEquals("T001", c.getTitular().getId());
 	}
 
