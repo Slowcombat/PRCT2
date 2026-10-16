@@ -116,6 +116,26 @@ public class TestDAOTarjeta {
 		}
 	}
 
+	/** Criterio: el estado se visualiza en el listado de todas las tarjetas. */
+	@Test
+	void readall_incluyeTarjetasConSuEstadoYTipo() throws Exception {
+		dao.create(new Debito("999001", "25/12/2025", Estado.BLOQUEADA, titular, 700.0));
+		dao.create(new Credito("999002", "25/12/2025", Estado.ACTIVA, titular, 9000.0));
+
+		java.util.List<Tarjeta> todas = dao.readall();
+
+		Tarjeta d = todas.stream().filter(t -> t.getNumero().equals("999001")).findFirst().orElse(null);
+		Tarjeta c = todas.stream().filter(t -> t.getNumero().equals("999002")).findFirst().orElse(null);
+		assertNotNull(d);
+		assertNotNull(c);
+		assertTrue(d instanceof Debito);
+		assertTrue(c instanceof Credito);
+		assertEquals(Estado.BLOQUEADA, d.getEstado());
+		assertEquals(Estado.ACTIVA, c.getEstado());
+		assertEquals(700.0, d.getDisponible());
+		assertEquals("T001", c.getTitular().getId());
+	}
+
 	@Test
 	void readone_noExiste() throws Exception {
 		assertNull(dao.readone("000000"));

@@ -31,6 +31,8 @@ package "co.edu.poli.parcial2.modelo" {
     + bloquear() : String
     + activar() : String
     + cancelar() : String
+    + {abstract} getDisponible() : double
+    + {abstract} getTipo() : String
     - validarNoCancelada() : void
   }
 
@@ -52,10 +54,14 @@ package "co.edu.poli.parcial2.modelo" {
 
   class Debito {
     - saldo : double
+    + getDisponible() : double
+    + getTipo() : String
   }
 
   class Credito {
     - limite : double
+    + getDisponible() : double
+    + getTipo() : String
   }
 
   ' Con linetype ortho PlantUML dibuja las multiplicidades invertidas;
@@ -92,7 +98,11 @@ package "co.edu.poli.parcial2.servicios" {
     - leerTitular(rs : ResultSet) : Titular
   }
 
-  class DAOTitular {
+  class DAOTitular <<HU-01>> {
+    + create(t : Titular) : String
+    + readone(id : K) : Titular
+    + readall() : List<Titular>
+    + validarParaGuardar(t : Titular) : String
   }
 
   ConexionBD "1" *--> "1" ConexionBD
@@ -102,14 +112,20 @@ package "co.edu.poli.parcial2.servicios" {
 
 package "co.edu.poli.parcial2.controlador" {
   class ControlFormCard <<HU-01>> {
+    - tablaTarjetas : TableView<Tarjeta>
+    - tablaTitulares : TableView<Titular>
     - cmbEstado : ComboBox<Estado>
     - cmbNuevoEstado : ComboBox<Estado>
-    - lblEstado : Label
-    - tarjetaConsultada : Tarjeta
-    - pressConsulta(event : ActionEvent) : void
-    - pressCreacion(event : ActionEvent) : void
+    - cmbTitular : ComboBox<Titular>
+    - tarjetas : ObservableList<Tarjeta>
+    - titulares : ObservableList<Titular>
+    - cargarDatos(numero : String) : void
+    - aplicarFiltro() : void
+    - mostrarDetalle(t : Tarjeta) : void
     - pressCambiarEstado(event : ActionEvent) : void
-    - mostrarEstado(t : Tarjeta) : void
+    - pressCreacion(event : ActionEvent) : void
+    - pressNuevoTitular(event : ActionEvent) : void
+    - pressGuardarTitular(event : ActionEvent) : void
   }
 }
 

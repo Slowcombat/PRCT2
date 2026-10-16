@@ -54,10 +54,10 @@ public class Titular {
 	}
 
 	/**
-	 * @return texto {@code "id, nombre"}, usado en el ComboBox de titulares
+	 * @return texto {@code "nombre (id)"}, usado en el ComboBox de titulares
 	 */
 	@Override
 	public String toString() {
-		return id + ", " + nombre;
+		return nombre + " (" + id + ")";
 	}
 }

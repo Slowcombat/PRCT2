@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.TabPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,7 +13,7 @@ import java.io.IOException;
  * {@code formCard.fxml}.
  *
  * @author Julian Larrarte
- * @version 1.0
+ * @version 2.0
  */
 public class App extends Application {
 
@@ -28,10 +27,11 @@ public class App extends Application {
 	 */
 	@Override
 	public void start(Stage stage) throws IOException {
-		TabPane root = (TabPane) FXMLLoader.load(getClass().getResource("/co/edu/poli/parcial2/formCard.fxml"));
+		Parent root = FXMLLoader.load(getClass().getResource("/co/edu/poli/parcial2/formCard.fxml"));
 		scene = new Scene(root);
-		stage.setTitle("Tarjetas");
-		stage.setResizable(false);
+		stage.setTitle("Gestión de tarjetas");
+		stage.setMinWidth(980);
+		stage.setMinHeight(640);
 		stage.setScene(scene);
 		stage.show();
 	}

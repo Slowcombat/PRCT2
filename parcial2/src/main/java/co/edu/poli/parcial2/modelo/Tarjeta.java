@@ -248,6 +248,21 @@ public abstract class Tarjeta {
 	}
 
 	/**
+	 * Valor monetario de la tarjeta que se muestra en la tabla: saldo en
+	 * débito, límite en crédito.
+	 *
+	 * @return saldo o límite
+	 */
+	public abstract double getDisponible();
+
+	/**
+	 * Nombre del tipo de tarjeta para mostrar en la interfaz.
+	 *
+	 * @return "Débito" o "Crédito"
+	 */
+	public abstract String getTipo();
+
+	/**
 	 * Regla de negocio: una tarjeta cancelada no puede volver a activarse ni bloquearse.
 	 *
 	 * @throws IllegalStateException si la tarjeta está cancelada

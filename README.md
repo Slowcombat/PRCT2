@@ -1,6 +1,14 @@
 # Tarjetas — JavaFX + MySQL · HU-01 Estado de la tarjeta
 
-Aplicación de escritorio en **JavaFX** con persistencia en **MySQL** para registrar y consultar tarjetas débito y crédito de un titular. Esta versión implementa la **HU-01**, que agrega a cada tarjeta un **estado obligatorio** (Activa, Bloqueada o Cancelada).
+Aplicación de escritorio en **JavaFX** con persistencia en **MySQL** para registrar tarjetas débito y crédito y sus titulares. Esta versión implementa la **HU-01**, que agrega a cada tarjeta un **estado obligatorio** (Activa, Bloqueada o Cancelada).
+
+**Funcionalidades:**
+
+- Listado de **todas las tarjetas** con su estado en color, búsqueda por número o titular y filtro por estado.
+- Panel de **detalle** de la tarjeta seleccionada, desde donde se le **asigna un nuevo estado**.
+- Registro de **tarjetas** con estado y titular obligatorios.
+- Registro de **titulares**, desde su propia pestaña o con el botón *+ Nuevo* del formulario de tarjeta.
+- Resumen en el encabezado con la cantidad de tarjetas por estado.
 
 > 📘 En la **[Wiki](../../wiki)** del repositorio están el diagrama UML actualizado y el video de la implementación.
 
@@ -21,8 +29,8 @@ Aplicación de escritorio en **JavaFX** con persistencia en **MySQL** para regis
 |---|---|---|---|
 | CA1 | La tarjeta puede estar **Activa**, **Bloqueada** o **Cancelada**. | Enum `Tarjeta.Estado` (anidado en `Tarjeta`) y tabla catálogo `estado_tarjeta`. | `TestEstado.existenExactamenteLosTresEstadosDeLaHU` |
 | CA2 | El estado se almacena de forma **persistente** en la base de datos. | Columna `tarjeta.estado` (FK a `estado_tarjeta`); `DAOTarjeta.create`, `readone` y `actualizarEstado` la escriben y leen. | `TestDAOTarjeta.create_debito_persisteEstado`, `create_credito_persisteEstado`, `actualizarEstado_persisteElNuevoEstado` |
-| CA3 | El estado se **visualiza** en el formulario principal. | Pestaña *Consultar*: etiqueta "Estado: …" con color por estado y en el detalle de la tarjeta. | `TestTarjeta.toString_contieneDatosYEstado` |
-| CA4 | El estado es **obligatorio** al crear una tarjeta. | Pestaña *Crear*: `ComboBox` "Estado *" sin valor preseleccionado; el controlador no deja continuar sin él. | `TestTarjeta.constructor_sinEstado_lanzaExcepcion` |
+| CA3 | El estado se **visualiza** en el formulario principal. | Pestaña *Tarjetas*: columna "Estado" con insignia de color en el listado, detalle de la tarjeta seleccionada y contadores por estado en el encabezado. | `TestDAOTarjeta.readall_incluyeTarjetasConSuEstadoYTipo` |
+| CA4 | El estado es **obligatorio** al crear una tarjeta. | Pestaña *Nueva tarjeta*: `ComboBox` "Estado *" sin valor preseleccionado; el controlador no deja continuar sin él. | `TestTarjeta.constructor_sinEstado_lanzaExcepcion` |
 | CA5 | **No** es posible guardar una tarjeta sin un estado válido. | Tres capas: el modelo rechaza `null`, el DAO valida antes del SQL y la BD rechaza estados vacíos o inexistentes (`NOT NULL` + FK). | `TestTarjeta.setEstado_null_…`, `TestEstado.desdeTexto_rechaza…`, `TestDAOTarjeta.baseDeDatos_rechazaTarjetaSinEstado`, `baseDeDatos_rechazaEstadoInvalido` |
 
 **¿Por qué el enum está dentro de `Tarjeta`?** El estado solo tiene sentido como parte de una tarjeta, así que se declara como `Tarjeta.Estado`. Al ser un tipo `public static` anidado, el DAO, el controlador y las pruebas lo usan con `import co.edu.poli.parcial2.modelo.Tarjeta.Estado;`.
@@ -52,7 +60,7 @@ Estimada con *Planning Poker* (escala Fibonacci) en **5 puntos de historia**: to
 - [x] **T4** · Base de datos: crear la tabla catálogo `estado_tarjeta`, cambiar `tarjeta.estado` a `VARCHAR(10) NOT NULL` con FK y actualizar los datos de prueba (`ScriptDB.sql`).
 - [x] **T5** · Escribir `MigracionHU01.sql` para bases existentes (convierte `1 → ACTIVA`, `0 → BLOQUEADA`).
 - [x] **T6** · `DAOTarjeta`: guardar y leer el estado como texto, `validarParaGuardar()` y `actualizarEstado()`.
-- [x] **T7** · `formCard.fxml`: `ComboBox` de estado obligatorio en *Crear*; etiqueta de estado y cambio de estado en *Consultar*.
+- [x] **T7** · `formCard.fxml`: `ComboBox` de estado obligatorio en *Nueva tarjeta*; columna de estado y cambio de estado en *Tarjetas*.
 - [x] **T8** · `ControlFormCard`: validar el estado obligatorio, mostrar el estado con color y aplicar el cambio de estado.
 - [x] **T9** · Pruebas unitarias (`TestEstado`, `TestTarjeta`, `TestDAOTarjetaValidacion`) y de integración (`TestDAOTarjeta`).
 - [x] **T10** · Documentar con JavaDoc y actualizar el diagrama UML de clases.
@@ -61,9 +69,13 @@ Estimada con *Planning Poker* (escala Fibonacci) en **5 puntos de historia**: to
 
 ## Capturas
 
-| Consultar (estado visible y cambio de estado) | Crear (estado obligatorio) |
+**Tarjetas:** listado con estado y detalle con cambio de estado.
+
+![Tarjetas](docs/img/tarjetas.png)
+
+| Nueva tarjeta (estado obligatorio) | Titulares |
 |---|---|
-| ![Consultar](docs/img/consultar.png) | ![Crear](docs/img/crear.png) |
+| ![Nueva tarjeta](docs/img/nueva.png) | ![Titulares](docs/img/titulares.png) |
 
 ## Diagrama de clases
 
@@ -95,9 +107,9 @@ JavaFxMySQL/
         │   ├── servicios/     CRUD, ConexionBD, DAOTarjeta, DAOTitular
         │   ├── controlador/   ControlFormCard
         │   └── vista/         App
-        ├── main/resources/…/formCard.fxml
+        ├── main/resources/…/formCard.fxml, estilos.css
         └── test/java/…/tests/
-            ├── unitaria/      TestEstado, TestTarjeta, TestDAOTarjetaValidacion
+            ├── unitaria/      TestEstado, TestTarjeta, TestDAOTarjetaValidacion, TestDAOTitularValidacion
             └── integracion/   TestDAOTarjeta, TestDAOTitular
 ```
 
@@ -140,11 +152,12 @@ mvn test -Pintegracion
 | Clase | Tipo | Pruebas |
 |---|---|---:|
 | `TestEstado` | Unitaria | 11 |
-| `TestTarjeta` | Unitaria | 10 |
+| `TestTarjeta` | Unitaria | 11 |
 | `TestDAOTarjetaValidacion` | Unitaria | 4 |
-| `TestDAOTarjeta` | Integración | 7 |
-| `TestDAOTitular` | Integración | 3 |
-| **Total** | | **35** |
+| `TestDAOTitularValidacion` | Unitaria | 6 |
+| `TestDAOTarjeta` | Integración | 8 |
+| `TestDAOTitular` | Integración | 4 |
+| **Total** | | **44** |
 
 Las pruebas de integración borran sus propios registros (`999xxx`) antes y después de cada prueba, así que se pueden ejecutar varias veces seguidas.
 
@@ -155,6 +168,13 @@ mvn javadoc:javadoc
 ```
 
 Se genera en `parcial2/target/site/apidocs/index.html`.
+
+## Mejoras adicionales a la HU-01
+
+- **Listado de tarjetas:** `DAOTarjeta.readall()` trae todas las tarjetas con su titular, tipo, estado y saldo o límite en una sola consulta (`LEFT JOIN` a las tablas de débito y crédito). Ya no hace falta buscar por número.
+- **Titulares:** `DAOTitular.create()` y `readone()` permiten registrar titulares; se valida identificación y nombre, y se informa si la identificación ya existe.
+- **Formulario de tarjeta:** se puede indicar el saldo inicial (débito) o el límite (crédito); antes eran valores fijos.
+- **Diseño:** hoja de estilos `estilos.css`, ventana redimensionable, insignias de color por estado y mensajes en la barra inferior.
 
 ## Otros cambios realizados
 

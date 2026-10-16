@@ -9,6 +9,7 @@ import co.edu.poli.parcial2.modelo.Titular;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -49,6 +50,13 @@ public class DAOTarjeta implements CRUD<Tarjeta> {
 			+ "ti.id AS titular_id, ti.nombre AS titular_nombre, c.limite " + "FROM tarjeta_credito c "
 			+ "INNER JOIN tarjeta t ON c.numero = t.numero " + "INNER JOIN titular ti ON t.titular_id = ti.id "
 			+ "WHERE c.numero = ?";
+
+	/** Lista todas las tarjetas con su titular y su saldo o límite. */
+	private static final String SQL_SELECT_TODAS = "SELECT t.numero, t.fecha_exp, t.estado, "
+			+ "ti.id AS titular_id, ti.nombre AS titular_nombre, d.saldo, c.limite, "
+			+ "CASE WHEN d.numero IS NOT NULL THEN 'D' ELSE 'C' END AS tipo " + "FROM tarjeta t "
+			+ "INNER JOIN titular ti ON t.titular_id = ti.id " + "LEFT JOIN tarjeta_debito d ON d.numero = t.numero "
+			+ "LEFT JOIN tarjeta_credito c ON c.numero = t.numero " + "ORDER BY ti.nombre, t.numero";
 
 	/** Actualiza únicamente el estado de una tarjeta. */
 	private static final String SQL_UPDATE_ESTADO = "UPDATE tarjeta SET estado = ? WHERE numero = ?";
@@ -93,7 +101,7 @@ public class DAOTarjeta implements CRUD<Tarjeta> {
 			}
 
 			con.commit();
-			return "✔ " + t.getClass().getSimpleName() + " [" + t.getNumero() + "] guardada correctamente con estado "
+			return "✔ Tarjeta " + t.getTipo().toLowerCase() + " " + t.getNumero() + " guardada con estado "
 					+ t.getEstado().getEtiqueta() + ".";
 		} catch (Exception e) {
 			con.rollback();
@@ -195,12 +203,27 @@ public class DAOTarjeta implements CRUD<Tarjeta> {
 	}
 
 	/**
-	 * No implementado en esta versión.
+	 * Lista todas las tarjetas registradas con su titular, estado y saldo o límite.
 	 *
-	 * @return {@code null}
+	 * @return lista de tarjetas ({@link Debito} o {@link Credito}); vacía si no hay
+	 * @throws Exception si ocurre un error de base de datos
 	 */
 	@Override
-	public List<Tarjeta> readall() {
-		return null;
+	public List<Tarjeta> readall() throws Exception {
+		Connection con = ConexionBD.getInstancia().getConexion();
+		List<Tarjeta> lista = new ArrayList<>();
+		try (PreparedStatement ps = con.prepareStatement(SQL_SELECT_TODAS); ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				Estado estado = Estado.desdeTexto(rs.getString("estado"));
+				if ("D".equals(rs.getString("tipo"))) {
+					lista.add(new Debito(rs.getString("numero"), rs.getString("fecha_exp"), estado, leerTitular(rs),
+							rs.getDouble("saldo")));
+				} else {
+					lista.add(new Credito(rs.getString("numero"), rs.getString("fecha_exp"), estado, leerTitular(rs),
+							rs.getDouble("limite")));
+				}
+			}
+		}
+		return lista;
 	}
 }

@@ -1,0 +1,314 @@
+/* =====================================================================
+   Estilos de la aplicación de tarjetas (JavaFX CSS)
+   ===================================================================== */
+
+.root {
+    -c-fondo: #f3f5fa;
+    -c-panel: #ffffff;
+    -c-borde: #e1e6ef;
+    -c-texto: #1d2433;
+    -c-suave: #6a7385;
+    -c-primario: #2f5bea;
+    -c-primario-hover: #2349c4;
+    -c-encabezado: #121c3a;
+
+    -c-activa: #157f3d;
+    -c-activa-fondo: #ddf6e5;
+    -c-bloqueada: #a85b06;
+    -c-bloqueada-fondo: #fdefcf;
+    -c-cancelada: #b4232a;
+    -c-cancelada-fondo: #fde2e3;
+
+    -fx-font-family: "Ubuntu", "Segoe UI", "Cantarell", "Helvetica Neue", sans-serif;
+    -fx-font-size: 13px;
+    -fx-text-fill: -c-texto;
+    -fx-background-color: -c-fondo;
+}
+
+/* ---------- Encabezado ---------- */
+.encabezado {
+    -fx-background-color: -c-encabezado;
+    -fx-padding: 16 24 16 24;
+}
+.titulo {
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.subtitulo {
+    -fx-text-fill: #a9b4d0;
+    -fx-font-size: 12px;
+}
+.chip {
+    -fx-background-radius: 20;
+    -fx-padding: 5 12 5 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(255,255,255,0.10);
+    -fx-text-fill: white;
+}
+.chip-activa    { -fx-background-color: #1d5c37; -fx-text-fill: #c9f3d7; }
+.chip-bloqueada { -fx-background-color: #6b4410; -fx-text-fill: #fde7b5; }
+.chip-cancelada { -fx-background-color: #6e2328; -fx-text-fill: #fbd0d2; }
+
+/* ---------- Pestañas ---------- */
+.tab-pane > .tab-header-area {
+    -fx-padding: 8 20 0 20;
+}
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -c-panel;
+    -fx-border-color: transparent transparent -c-borde transparent;
+}
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8 16 8 16;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 3 0;
+}
+.tab-pane .tab .tab-label {
+    -fx-text-fill: -c-suave;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.tab-pane .tab:selected {
+    -fx-border-color: -c-primario;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -c-primario;
+}
+.tab-pane .tab:focused .focus-indicator,
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+
+/* ---------- Paneles ---------- */
+.contenido {
+    -fx-padding: 20;
+}
+.panel {
+    -fx-background-color: -c-panel;
+    -fx-background-radius: 12;
+    -fx-border-color: -c-borde;
+    -fx-border-radius: 12;
+    -fx-padding: 18;
+}
+.titulo-seccion {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -c-texto;
+}
+.subtitulo-seccion {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -c-suave;
+}
+.ayuda {
+    -fx-text-fill: -c-suave;
+    -fx-font-size: 12px;
+}
+.etiqueta-campo {
+    -fx-text-fill: -c-texto;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+.dato-titulo {
+    -fx-text-fill: -c-suave;
+    -fx-font-size: 12px;
+}
+.dato-valor {
+    -fx-text-fill: -c-texto;
+    -fx-font-weight: bold;
+}
+.separator .line {
+    -fx-border-color: -c-borde;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ---------- Campos ---------- */
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #cfd6e3;
+    -fx-border-radius: 8;
+    -fx-padding: 4 8 4 8;
+    -fx-pref-height: 34px;
+}
+.combo-box .list-cell, .date-picker > .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: -c-primario;
+    -fx-border-width: 1.5;
+}
+.campo-error, .campo-error:focused {
+    -fx-border-color: -c-cancelada;
+    -fx-border-width: 1.5;
+}
+.radio-button {
+    -fx-text-fill: -c-texto;
+}
+
+/* ---------- Botones ---------- */
+.button {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16 8 16;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.boton-primario {
+    -fx-background-color: -c-primario;
+    -fx-text-fill: white;
+}
+.boton-primario:hover {
+    -fx-background-color: -c-primario-hover;
+}
+.boton-secundario {
+    -fx-background-color: white;
+    -fx-text-fill: -c-texto;
+    -fx-border-color: #cfd6e3;
+}
+.boton-secundario:hover {
+    -fx-background-color: #eef1f7;
+}
+.button:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* ---------- Tablas ---------- */
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: -c-borde;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0;
+}
+.table-view .column-header-background {
+    -fx-background-color: #f7f9fc;
+    -fx-background-radius: 8 8 0 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -c-borde transparent;
+    -fx-size: 38px;
+}
+.table-view .column-header .label {
+    -fx-text-fill: -c-suave;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 0 0 6;
+}
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #eef1f6 transparent;
+    -fx-cell-size: 42px;
+}
+.table-row-cell:odd {
+    -fx-background-color: white;
+}
+.table-row-cell:empty, .table-row-cell:empty:hover {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+}
+.table-row-cell:hover {
+    -fx-background-color: #f5f8ff;
+}
+.table-row-cell:selected {
+    -fx-background-color: #e5ecff;
+}
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: -c-texto;
+}
+.table-cell {
+    -fx-padding: 0 6 0 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-text-fill: -c-texto;
+    -fx-border-color: transparent;
+}
+.celda-numero {
+    -fx-font-family: "Ubuntu Mono", "DejaVu Sans Mono", monospace;
+    -fx-font-size: 13px;
+}
+.celda-dinero {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-padding: 0 14 0 6;
+}
+.table-view .placeholder .label {
+    -fx-text-fill: -c-suave;
+}
+
+/* ---------- Insignias de estado ---------- */
+.badge {
+    -fx-background-radius: 20;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+.badge-activa    { -fx-background-color: -c-activa-fondo;    -fx-text-fill: -c-activa; }
+.badge-bloqueada { -fx-background-color: -c-bloqueada-fondo; -fx-text-fill: -c-bloqueada; }
+.badge-cancelada { -fx-background-color: -c-cancelada-fondo; -fx-text-fill: -c-cancelada; }
+
+/* ---------- Tarjeta visual del detalle ---------- */
+.tarjeta-visual {
+    -fx-background-radius: 14;
+    -fx-padding: 18 20 18 20;
+    -fx-min-height: 168px;
+    -fx-pref-height: 168px;
+    -fx-background-color: linear-gradient(to bottom right, #8a93a6, #b9c0cc);
+}
+.tv-debito  { -fx-background-color: linear-gradient(to bottom right, #0d5c63, #1f9e8f); }
+.tv-credito { -fx-background-color: linear-gradient(to bottom right, #1f2f7a, #4a63e0); }
+.tv-bloqueada { -fx-opacity: 0.80; }
+.tv-cancelada { -fx-background-color: linear-gradient(to bottom right, #4b505b, #7c8291); }
+.tv-tipo {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.tv-numero {
+    -fx-text-fill: white;
+    -fx-font-family: "Ubuntu Mono", "DejaVu Sans Mono", monospace;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+.tv-dato-titulo {
+    -fx-text-fill: rgba(255,255,255,0.65);
+    -fx-font-size: 10px;
+}
+.tv-dato {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.tv-chip {
+    -fx-background-color: linear-gradient(to bottom right, #e9d38c, #c8a948);
+    -fx-background-radius: 5;
+    -fx-min-width: 36px;
+    -fx-min-height: 26px;
+    -fx-max-width: 36px;
+    -fx-max-height: 26px;
+}
+
+/* ---------- Barra de estado ---------- */
+.barra-estado {
+    -fx-background-color: -c-panel;
+    -fx-border-color: -c-borde transparent transparent transparent;
+    -fx-padding: 8 24 8 24;
+}
+.mensaje-ok    { -fx-text-fill: -c-activa;    -fx-font-weight: bold; }
+.mensaje-aviso { -fx-text-fill: -c-bloqueada; -fx-font-weight: bold; }
+.mensaje-error { -fx-text-fill: -c-cancelada; -fx-font-weight: bold; }
+
+/* ---------- Diálogos ---------- */
+.dialog-pane {
+    -fx-background-color: white;
+}
+.dialog-pane > .content {
+    -fx-padding: 18;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #f7f9fc;
+}

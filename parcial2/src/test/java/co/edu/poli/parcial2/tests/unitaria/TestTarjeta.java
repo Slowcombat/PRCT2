@@ -120,6 +120,17 @@ public class TestTarjeta {
 		assertEquals(nuevo, t.getTitular());
 	}
 
+	@Test
+	void tipoYValor_dependenDeLaSubclase() {
+		Tarjeta d = new Debito("1", "25/12/2025", Estado.ACTIVA, titular, 1500);
+		Tarjeta c = new Credito("2", "25/12/2025", Estado.ACTIVA, titular, 9000);
+
+		assertEquals("Débito", d.getTipo());
+		assertEquals("Crédito", c.getTipo());
+		assertEquals(1500, d.getDisponible());
+		assertEquals(9000, c.getDisponible());
+	}
+
 	/** Criterio: el estado se visualiza (el formulario muestra toString()). */
 	@Test
 	void toString_contieneDatosYEstado() {

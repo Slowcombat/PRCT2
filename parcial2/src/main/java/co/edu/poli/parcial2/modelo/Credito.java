@@ -42,6 +42,22 @@ public class Credito extends Tarjeta {
 	}
 
 	/**
+	 * @return límite de crédito
+	 */
+	@Override
+	public double getDisponible() {
+		return limite;
+	}
+
+	/**
+	 * @return "Crédito"
+	 */
+	@Override
+	public String getTipo() {
+		return "Crédito";
+	}
+
+	/**
 	 * @return representación textual de la tarjeta crédito
 	 */
 	@Override

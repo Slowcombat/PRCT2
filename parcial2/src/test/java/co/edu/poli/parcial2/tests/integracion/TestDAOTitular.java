@@ -1,50 +1,78 @@
 package co.edu.poli.parcial2.tests.integracion;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import co.edu.poli.parcial2.modelo.Titular;
+import co.edu.poli.parcial2.servicios.ConexionBD;
 import co.edu.poli.parcial2.servicios.DAOTitular;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-
+/**
+ * Pruebas de integración de {@link DAOTitular} contra MySQL.
+ * Se ejecutan con {@code mvn test -Pintegracion}.
+ *
+ * @author Julian Larrarte
+ */
 @Tag("integracion")
 public class TestDAOTitular {
 
-    // ✔️ 1. Test: la lista no es null
-    @Test
-    void readAll_noDebeRetornarNull() throws Exception {
-        DAOTitular dao = new DAOTitular();
+	private static final String ID_PRUEBA = "TEST-999";
 
-        List<Titular> lista = dao.readall();
+	private final DAOTitular dao = new DAOTitular();
 
-        assertNotNull(lista);
-    }
+	@BeforeEach
+	@AfterEach
+	void limpiar() throws Exception {
+		Connection con = ConexionBD.getInstancia().getConexion();
+		try (PreparedStatement ps = con.prepareStatement("DELETE FROM titular WHERE id = ?")) {
+			ps.setString(1, ID_PRUEBA);
+			ps.executeUpdate();
+		}
+	}
 
-    // ✔️ 2. Test: la lista puede estar vacía pero válida
-    @Test
-    void readAll_listaInicializada() throws Exception {
-        DAOTitular dao = new DAOTitular();
+	@Test
+	void readAll_retornaLosTitularesDelScript() throws Exception {
+		List<Titular> lista = dao.readall();
 
-        List<Titular> lista = dao.readall();
+		assertNotNull(lista);
+		assertTrue(lista.stream().anyMatch(t -> t.getId().equals("T001")));
+		lista.forEach(t -> {
+			assertNotNull(t.getId());
+			assertNotNull(t.getNombre());
+		});
+	}
 
-        assertTrue(lista.size() >= 0);
-    }
+	@Test
+	void create_guardaYSePuedeLeer() throws Exception {
+		String resultado = dao.create(new Titular(ID_PRUEBA, "Titular de Prueba"));
 
-    // ✔️ 3. Test: si hay datos, los objetos están bien formados
-    @Test
-    void readAll_objetosValidos() throws Exception {
-        DAOTitular dao = new DAOTitular();
+		assertTrue(resultado.startsWith("✔"), resultado);
+		Titular leido = dao.readone(ID_PRUEBA);
+		assertNotNull(leido);
+		assertEquals("Titular de Prueba", leido.getNombre());
+		assertTrue(dao.readall().stream().anyMatch(t -> t.getId().equals(ID_PRUEBA)));
+	}
 
-        List<Titular> lista = dao.readall();
+	@Test
+	void create_idRepetido_informaError() throws Exception {
+		dao.create(new Titular(ID_PRUEBA, "Primero"));
 
-        if (!lista.isEmpty()) {
-            Titular t = lista.get(0);
+		String resultado = dao.create(new Titular(ID_PRUEBA, "Segundo"));
 
-            assertNotNull(t.getId());
-            assertNotNull(t.getNombre());
-        }
-    }
+		assertTrue(resultado.contains("Ya existe"), resultado);
+		assertEquals("Primero", dao.readone(ID_PRUEBA).getNombre());
+	}
+
+	@Test
+	void readone_noExiste() throws Exception {
+		assertNull(dao.readone("NO-EXISTE"));
+	}
 }
