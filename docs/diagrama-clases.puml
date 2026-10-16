@@ -24,7 +24,6 @@ package "co.edu.poli.parcial2.modelo" {
     - fechaExp : String
     - estado : Estado
     - titular : Titular
-    --
     + Tarjeta(numero : String, fechaExp : String, estado : Estado, titular : Titular)
     + getEstado() : Estado
     + setEstado(estado : Estado) : void
@@ -33,11 +32,13 @@ package "co.edu.poli.parcial2.modelo" {
     + activar() : String
     + cancelar() : String
     - validarNoCancelada() : void
-    == «enumeration» Estado (enum interno de Tarjeta) ==
+  }
+
+  enum "Tarjeta::Estado" as Estado <<enumeration>> <<HU-01>> {
     ACTIVA
     BLOQUEADA
     CANCELADA
-    ..
+    --
     - etiqueta : String
     + getEtiqueta() : String
     + permiteUso() : boolean
@@ -60,6 +61,8 @@ package "co.edu.poli.parcial2.modelo" {
   ' Con linetype ortho PlantUML dibuja las multiplicidades invertidas;
   ' se escriben al revés para que la imagen muestre Tarjeta * → 1 Titular.
   Titular "*" <-left-* "1" Tarjeta
+  ' Estado es un enum anidado (miembro) de Tarjeta
+  Estado -right-+ Tarjeta
   Debito -up-|> Tarjeta : Extends
   Credito -up-|> Tarjeta : Extends
 }
@@ -113,4 +116,5 @@ package "co.edu.poli.parcial2.controlador" {
 ControlFormCard --> DAOTarjeta
 ControlFormCard --> DAOTitular
 DAOTarjeta ..> Tarjeta : <<use>>
+DAOTarjeta ..> Estado : <<use>>
 @enduml
