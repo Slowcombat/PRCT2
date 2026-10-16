@@ -2,77 +2,133 @@ package co.edu.poli.examen2_Soto.tests.unitaria;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import co.edu.poli.examen2_Soto.modelo.Credito;
 import co.edu.poli.examen2_Soto.modelo.Debito;
+import co.edu.poli.examen2_Soto.modelo.EstadoTarjeta;
 import co.edu.poli.examen2_Soto.modelo.Tarjeta;
 import co.edu.poli.examen2_Soto.modelo.Titular;
 
+/**
+ * Pruebas unitarias de {@link Tarjeta} y el manejo de su estado (HU-01).
+ * No requieren base de datos.
+ *
+ * @author Julian Larrarte
+ */
 public class TestTarjeta {
 
-	@Test
-	void bloquear_cambiaEstadoAFalso() {
-		Titular titular = new Titular("1", "Test");
+	private Titular titular;
 
-		Tarjeta t = new Debito("123", "2025-12-25", true, titular, 1000);
+	@BeforeEach
+	void setUp() {
+		titular = new Titular("1", "Test");
+	}
+
+	/** Criterio: el estado es obligatorio al crear una tarjeta. */
+	@Test
+	void constructor_sinEstado_lanzaExcepcion() {
+		IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+				() -> new Debito("123", "25/12/2025", null, titular, 1000));
+		assertTrue(ex.getMessage().contains("obligatorio"));
+
+		assertThrows(IllegalArgumentException.class, () -> new Credito("124", "25/12/2025", null, titular, 1000));
+	}
+
+	@Test
+	void constructor_guardaElEstadoRecibido() {
+		for (EstadoTarjeta estado : EstadoTarjeta.values()) {
+			Tarjeta t = new Credito("123", "25/12/2025", estado, titular, 5000);
+			assertEquals(estado, t.getEstado());
+		}
+	}
+
+	@Test
+	void setEstado_null_lanzaExcepcionYConservaElEstadoAnterior() {
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.ACTIVA, titular, 1000);
+
+		assertThrows(IllegalArgumentException.class, () -> t.setEstado(null));
+		assertEquals(EstadoTarjeta.ACTIVA, t.getEstado());
+	}
+
+	@Test
+	void bloquear_cambiaEstadoABloqueada() {
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.ACTIVA, titular, 1000);
 
 		String mensaje = t.bloquear();
 
-		assertFalse(t.isEstado());
+		assertEquals(EstadoTarjeta.BLOQUEADA, t.getEstado());
+		assertFalse(t.puedeUsarse());
 		assertTrue(mensaje.contains("BLOQUEADA"));
 	}
 
 	@Test
-	void activar_cambiaEstadoAVerdadero() {
-		Titular titular = new Titular("1", "Test");
-
-		Tarjeta t = new Debito("123", "2025-12-25", false, titular, 1000);
+	void activar_cambiaEstadoAActiva() {
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.BLOQUEADA, titular, 1000);
 
 		String mensaje = t.activar();
 
-		assertTrue(t.isEstado());
+		assertEquals(EstadoTarjeta.ACTIVA, t.getEstado());
+		assertTrue(t.puedeUsarse());
 		assertTrue(mensaje.contains("ACTIVADA"));
 	}
 
 	@Test
-	void getters_retornaValoresCorrectos() {
-		Titular titular = new Titular("1", "Test");
+	void cancelar_cambiaEstadoACancelada() {
+		Tarjeta t = new Credito("123", "25/12/2025", EstadoTarjeta.ACTIVA, titular, 1000);
 
-		Tarjeta t = new Debito("123", "2025-12-25", true, titular, 1000);
+		String mensaje = t.cancelar();
+
+		assertEquals(EstadoTarjeta.CANCELADA, t.getEstado());
+		assertFalse(t.puedeUsarse());
+		assertTrue(mensaje.contains("CANCELADA"));
+	}
+
+	@Test
+	void tarjetaCancelada_noPuedeActivarseNiBloquearse() {
+		Tarjeta t = new Credito("123", "25/12/2025", EstadoTarjeta.CANCELADA, titular, 1000);
+
+		assertThrows(IllegalStateException.class, t::activar);
+		assertThrows(IllegalStateException.class, t::bloquear);
+		assertEquals(EstadoTarjeta.CANCELADA, t.getEstado());
+	}
+
+	@Test
+	void getters_retornanValoresCorrectos() {
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.ACTIVA, titular, 1000);
 
 		assertEquals("123", t.getNumero());
-		assertEquals("2025-12-25", t.getFechaExp());
-		assertTrue(t.isEstado());
+		assertEquals("25/12/2025", t.getFechaExp());
+		assertEquals(EstadoTarjeta.ACTIVA, t.getEstado());
 		assertEquals(titular, t.getTitular());
 	}
 
 	@Test
 	void setters_modificanValores() {
-		Titular titular = new Titular("1", "Test");
 		Titular nuevo = new Titular("2", "Nuevo");
-
-		Tarjeta t = new Debito("123", "2025-12-25", true, titular, 1000);
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.ACTIVA, titular, 1000);
 
 		t.setNumero("999");
-		t.setFechaExp("2030-01-01");
-		t.setEstado(false);
+		t.setFechaExp("01/01/2030");
+		t.setEstado(EstadoTarjeta.BLOQUEADA);
 		t.setTitular(nuevo);
 
 		assertEquals("999", t.getNumero());
-		assertEquals("2030-01-01", t.getFechaExp());
-		assertFalse(t.isEstado());
+		assertEquals("01/01/2030", t.getFechaExp());
+		assertEquals(EstadoTarjeta.BLOQUEADA, t.getEstado());
 		assertEquals(nuevo, t.getTitular());
 	}
 
+	/** Criterio: el estado se visualiza (el formulario muestra toString()). */
 	@Test
-	void toString_contieneDatos() {
-		Titular titular = new Titular("1", "Test");
-
-		Tarjeta t = new Debito("123", "2025-12-25", true, titular, 1000);
+	void toString_contieneDatosYEstado() {
+		Tarjeta t = new Debito("123", "25/12/2025", EstadoTarjeta.BLOQUEADA, titular, 1000);
 
 		String texto = t.toString();
 
 		assertTrue(texto.contains("123"));
-		assertTrue(texto.contains("2025-12-25"));
+		assertTrue(texto.contains("25/12/2025"));
+		assertTrue(texto.contains("estado=Bloqueada"));
 	}
 }

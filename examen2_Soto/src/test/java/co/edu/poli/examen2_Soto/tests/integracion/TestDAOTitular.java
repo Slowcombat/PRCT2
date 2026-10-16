@@ -1,5 +1,6 @@
 package co.edu.poli.examen2_Soto.tests.integracion;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import co.edu.poli.examen2_Soto.modelo.Titular;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+@Tag("integracion")
 public class TestDAOTitular {
 
     // ✔️ 1. Test: la lista no es null

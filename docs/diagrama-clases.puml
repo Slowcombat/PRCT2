@@ -1,0 +1,113 @@
+@startuml diagrama-clases
+' Diagrama de clases — examen2_Soto v2.0 (HU-01: estado de la tarjeta)
+' Elementos nuevos o modificados por la HU-01 resaltados en amarillo.
+skinparam classAttributeIconSize 0
+skinparam packageStyle folder
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor black
+  ArrowColor black
+  BackgroundColor<<HU-01>> #FFF4C2
+}
+hide empty members
+title Diagrama de clases — HU-01 Estado de la tarjeta
+
+package "co.edu.poli.examen2_Soto.modelo" {
+
+  abstract class Tarjeta <<HU-01>> {
+    - numero : String
+    - fechaExp : String
+    - estado : EstadoTarjeta
+    - titular : Titular
+    + Tarjeta(numero : String, fechaExp : String, estado : EstadoTarjeta, titular : Titular)
+    + getEstado() : EstadoTarjeta
+    + setEstado(estado : EstadoTarjeta) : void
+    + puedeUsarse() : boolean
+    + bloquear() : String
+    + activar() : String
+    + cancelar() : String
+    - validarNoCancelada() : void
+  }
+
+  enum EstadoTarjeta <<HU-01>> {
+    ACTIVA
+    BLOQUEADA
+    CANCELADA
+    --
+    - etiqueta : String
+    + getEtiqueta() : String
+    + permiteUso() : boolean
+    + {static} desdeTexto(valor : String) : EstadoTarjeta
+  }
+
+  class Titular {
+    - id : String
+    - nombre : String
+  }
+
+  class Debito {
+    - saldo : double
+  }
+
+  class Credito {
+    - limite : double
+  }
+
+  Tarjeta "*" *-right-> "1" Titular
+  Tarjeta "*" -down-> "1" EstadoTarjeta : estado
+  Debito -up-|> Tarjeta : Extends
+  Credito -up-|> Tarjeta : Extends
+}
+
+package "co.edu.poli.examen2_Soto.servicios" {
+
+  interface "CRUD<T>" as CRUD {
+    + create(t : T) : String
+    + readone(id : K) : <K> T
+    + readall() : List<T>
+  }
+
+  class ConexionBD {
+    - {static} instancia : ConexionBD
+    - conexion : Connection
+    - ConexionBD()
+    + {static} getInstancia() : ConexionBD
+    + getConexion() : Connection
+  }
+
+  class DAOTarjeta <<HU-01>> {
+    + create(t : Tarjeta) : String
+    + readone(num : K) : Tarjeta
+    + readall() : List<Tarjeta>
+    + validarParaGuardar(t : Tarjeta) : String
+    + actualizarEstado(numero : String, nuevoEstado : EstadoTarjeta) : String
+    - leerTitular(rs : ResultSet) : Titular
+  }
+
+  class DAOTitular {
+  }
+
+  ConexionBD "1" *--> "1" ConexionBD
+  DAOTarjeta .up.|> CRUD
+  DAOTitular .up.|> CRUD
+}
+
+package "co.edu.poli.examen2_Soto.controlador" {
+  class ControlFormCard <<HU-01>> {
+    - cmbEstado : ComboBox<EstadoTarjeta>
+    - cmbNuevoEstado : ComboBox<EstadoTarjeta>
+    - lblEstado : Label
+    - tarjetaConsultada : Tarjeta
+    - pressConsulta(event : ActionEvent) : void
+    - pressCreacion(event : ActionEvent) : void
+    - pressCambiarEstado(event : ActionEvent) : void
+    - mostrarEstado(t : Tarjeta) : void
+  }
+}
+
+ControlFormCard --> DAOTarjeta
+ControlFormCard --> DAOTitular
+DAOTarjeta ..> Tarjeta : <<use>>
+DAOTarjeta ..> EstadoTarjeta : <<use>>
+@enduml

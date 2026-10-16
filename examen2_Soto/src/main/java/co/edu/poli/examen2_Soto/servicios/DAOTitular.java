@@ -8,18 +8,43 @@ import java.util.List;
 
 import co.edu.poli.examen2_Soto.modelo.Titular;
 
+/**
+ * Objeto de acceso a datos (DAO) para {@link Titular}.
+ *
+ * @author Julian Larrarte
+ * @version 1.0
+ */
 public class DAOTitular implements CRUD<Titular> {
 
+	/**
+	 * No implementado en esta versión.
+	 *
+	 * @param t titular
+	 * @return {@code null}
+	 */
 	@Override
 	public String create(Titular t) {
 		return null;
 	}
 	
+	/**
+	 * No implementado en esta versión.
+	 *
+	 * @param id  llave del titular
+	 * @param <K> tipo de la llave
+	 * @return {@code null}
+	 */
 	@Override
 	public <K> Titular readone(K id) throws Exception {
 		return null;
 	}
 
+	/**
+	 * Lista todos los titulares registrados.
+	 *
+	 * @return lista de titulares (vacía si no hay registros)
+	 * @throws Exception si ocurre un error de base de datos
+	 */
 	@Override
 	public List<Titular> readall() throws Exception {
 

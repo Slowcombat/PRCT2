@@ -1,5 +1,9 @@
 -- ================================================================
 --  Script MySQL — examen2_soto
+--  Versión 2.0 — HU-01: estado de la tarjeta (Activa / Bloqueada / Cancelada)
+--
+--  Si ya tenía la base creada con la versión anterior, NO ejecute este
+--  script: ejecute MigracionHU01.sql.
 --
 --  Estrategia ORM: JOINED TABLE  (InheritanceType.JOINED)
 --  Una tabla por clase → sin repetición de columnas → normalizado.
@@ -9,6 +13,7 @@
 --  │  Clase Java            │  Tabla MySQL       │  Relación   │
 --  ├────────────────────────────────────────────────────────────┤
 --  │  Titular               │  titular           │  —          │
+--  │  EstadoTarjeta (enum)  │  estado_tarjeta    │  catálogo   │
 --  │  Tarjeta  (abstracta)  │  tarjeta           │  —          │
 --  │  Debito  extends Tarjeta│ tarjeta_debito    │  1:1 FK     │
 --  │  Credito extends Tarjeta│ tarjeta_credito   │  1:1 FK     │
@@ -16,6 +21,7 @@
 --
 --  Relaciones:
 --    tarjeta.titular_id        → titular.id         (@ManyToOne  * → 1)
+--    tarjeta.estado            → estado_tarjeta.codigo  (HU-01  * → 1)
 --    tarjeta_debito.numero     → tarjeta.numero     (@OneToOne   1 → 1)
 --    tarjeta_credito.numero    → tarjeta.numero     (@OneToOne   1 → 1)
 -- ================================================================
@@ -45,6 +51,29 @@ CREATE TABLE IF NOT EXISTS titular (
   COMMENT = '@Entity Titular';
 
 -- ================================================================
+-- TABLA 1.1 — estado_tarjeta  (HU-01)
+-- Enum Java: EstadoTarjeta { ACTIVA, BLOQUEADA, CANCELADA }
+-- Catálogo de estados válidos. Se usa una tabla + FK (y no un ENUM)
+-- porque MySQL asigna a un ENUM NOT NULL su primer valor cuando el
+-- INSERT omite la columna; con la FK, una tarjeta sin estado o con
+-- un estado inexistente es rechazada por la base de datos.
+-- ================================================================
+CREATE TABLE IF NOT EXISTS estado_tarjeta (
+
+    codigo       VARCHAR(10)  NOT NULL  COMMENT 'Nombre de la constante del enum EstadoTarjeta',
+    descripcion  VARCHAR(100) NOT NULL  COMMENT 'Significado del estado',
+
+    PRIMARY KEY (codigo)
+
+) ENGINE = InnoDB
+  COMMENT = 'HU-01 Catálogo de estados de tarjeta';
+
+INSERT INTO estado_tarjeta (codigo, descripcion) VALUES
+    ('ACTIVA',    'La tarjeta puede ser utilizada'),
+    ('BLOQUEADA', 'Uso suspendido temporalmente; puede reactivarse'),
+    ('CANCELADA', 'Baja definitiva; no puede reactivarse');
+
+-- ================================================================
 -- TABLA 2 — tarjeta
 -- Clase: Tarjeta (abstracta — @MappedSuperclass con @Inheritance JOINED)
 -- Almacena TODOS los campos comunes de la jerarquía (sin repetirlos).
@@ -57,17 +86,24 @@ CREATE TABLE IF NOT EXISTS tarjeta (
     numero      VARCHAR(20)  NOT NULL  COMMENT '@Id — PK compartida con subclases',
 
     -- @Column(name = "fecha_exp")
-    fecha_exp   VARCHAR(7)   NOT NULL  COMMENT '@Column heredado — formato MM/AAAA',
+    fecha_exp   VARCHAR(10)  NOT NULL  COMMENT '@Column heredado — formato dd/MM/yyyy',
 
-    -- @Column(name = "estado")  true=activa | false=bloqueada
-    estado      TINYINT(1)   NOT NULL
-                    DEFAULT 1          COMMENT '@Column heredado — 1 activa / 0 bloqueada',
+    -- HU-01 — @Enumerated(EnumType.STRING) @Column(name = "estado", nullable = false)
+    -- Obligatorio: NOT NULL y SIN valor por defecto → el INSERT debe enviarlo.
+    estado      VARCHAR(10)  NOT NULL  COMMENT '@Column heredado — HU-01 FK → estado_tarjeta.codigo',
 
     -- @ManyToOne  @JoinColumn(name = "titular_id")
     -- Cardinalidad: N tarjetas → 1 titular  (diagrama: * → 1)
     titular_id  VARCHAR(50)  NOT NULL  COMMENT '@ManyToOne FK → titular.id',
 
     PRIMARY KEY (numero),
+
+    -- HU-01: no se permite guardar una tarjeta sin un estado válido
+    CONSTRAINT fk_tarjeta_estado
+        FOREIGN KEY (estado)
+        REFERENCES  estado_tarjeta (codigo)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
 
     CONSTRAINT fk_tarjeta_titular
         FOREIGN KEY (titular_id)
@@ -146,10 +182,10 @@ INSERT INTO titular (id, nombre) VALUES
     ('T002', 'María López');
 
 INSERT INTO tarjeta (numero, fecha_exp, estado, titular_id) VALUES
-    ('4111111111111111', '12/2027', 1, 'T001'),
-    ('5500005555555559', '06/2026', 1, 'T001'),
-    ('4000056655665556', '09/2025', 0, 'T002'),
-    ('5105105105105100', '03/2027', 1, 'T002');
+    ('4111111111111111', '01/12/2024', 'ACTIVA',    'T001'),
+    ('5500005555555559', '15/06/2023', 'ACTIVA',    'T001'),
+    ('4000056655665556', '20/09/2022', 'BLOQUEADA', 'T002'),
+    ('5105105105105100', '10/03/2024', 'CANCELADA', 'T002');
 
 INSERT INTO tarjeta_debito (numero, saldo) VALUES
     ('4111111111111111', 1500000.00),
