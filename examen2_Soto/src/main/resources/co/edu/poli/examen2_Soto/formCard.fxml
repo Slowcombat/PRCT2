@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="215.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="co.edu.poli.examen2_Soto.controlador.ControlFormCard">
+  <tabs>
+    <Tab text="Consultar">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+               <children>
+                  <Button fx:id="bttConsulta" layoutX="314.0" layoutY="38.0" mnemonicParsing="false" onAction="#pressConsulta" prefHeight="25.0" prefWidth="144.0" text="Consulta" />
+                  <TextField fx:id="txtTarjeta1" layoutX="127.0" layoutY="38.0" promptText="Numero tarjeta" />
+                  <TextArea fx:id="txtAreaResultado" layoutX="69.0" layoutY="78.0" prefHeight="76.0" prefWidth="462.0" editable="false" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+    <Tab text="Crear">
+      <content>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="206.0" prefWidth="557.0">
+               <children>
+                  <TextField fx:id="txtTarjeta2" layoutX="46.0" layoutY="50.0" promptText="Numero tarjeta" />
+                  <DatePicker fx:id="datepk1" layoutX="225.0" layoutY="50.0" prefWidth="150.0" promptText="Fecha Expedición" />
+                  <ComboBox fx:id="cmbTitular" layoutX="408.0" layoutY="50.0" prefHeight="25.0" prefWidth="150.0" promptText="Titular" />
+                  <RadioButton fx:id="radio1" prefWidth="200" layoutX="107.0" layoutY="125.0" mnemonicParsing="false" selected="true" text="Débito">
+                     <toggleGroup>
+                        <ToggleGroup fx:id="tipo" />
+                     </toggleGroup>
+                  </RadioButton>
+                  <RadioButton fx:id="radio2" prefWidth="200" layoutX="270.0" layoutY="125.0" mnemonicParsing="false" text="Crédito" toggleGroup="$tipo" />
+                  <Button fx:id="bttCreacion" layoutX="408.0" layoutY="121.0" mnemonicParsing="false" onAction="#pressCreacion" prefHeight="25.0" prefWidth="150.0" text="Creación" />
+               </children></AnchorPane>
+      </content>
+    </Tab>
+  </tabs>
+</TabPane>
